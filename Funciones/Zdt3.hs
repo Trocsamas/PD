@@ -1,3 +1,7 @@
+module Funciones.Zdt3
+(zdt3
+) where
+
 import Data.Array
 
 type Vector a = Array Int a
