@@ -2,6 +2,7 @@
 
 import Funciones.Zdt3
 import Graphics.Gnuplot.Simple
+import qualified Graphics.Gnuplot.Terminal.SVG as SVG
 
 ej1 = zdt3 [8.528997e-01,4.455033e-04,2.023997e-03,5.397792e-03,5.944923e-04,1.067563e-03,3.566097e-03,1.382548e-03,6.985887e-04,1.958344e-04,
           1.076955e-03,1.207479e-03,9.879777e-03,1.368514e-04,9.025464e-04,5.268854e-04,4.552294e-03,1.122561e-05,1.755626e-03,3.247557e-04,
@@ -33,5 +34,3 @@ foo = do
              , terminal (SVG.cons "./out/output.svg")
              ,Custom "style line" ["3","lc","3","lw","3"]
              ] (map snd zs)
-
-             
