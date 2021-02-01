@@ -33,3 +33,5 @@ foo = do
              , terminal (SVG.cons "./out/output.svg")
              ,Custom "style line" ["3","lc","3","lw","3"]
              ] (map snd zs)
+
+             
