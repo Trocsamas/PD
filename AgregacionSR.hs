@@ -13,3 +13,23 @@ dib2 =
     plotList [] (take 30 fibs)
     where fibs :: [Double] 
           fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+
+-- Prueba de muestreo de imagenes mediante GNUplot
+
+someFunc :: IO ()
+someFunc = putStrLn "someFunc"
+
+foo = do
+    let zs = [ (x,x) | x <- [1..10] ]
+    plotList [Key Nothing
+             ,YRange (0,maximum (map snd zs) + 1)
+             ,XLabel "Days since launch of Hackage"
+             ,YLabel "Unique uploads each day"
+             ,Title "Daily uploads (180 day moving average) to http://hackage.haskell.org"
+             ,Custom "grid" []
+             -- ,SVG "/tmp/hackage-daily-graph.svg"
+             -- ,Custom "terminal svg;set output \"/tmp/hackage-daily-graph.svg\""[]
+             , terminal (SVG.cons "./out/output.svg")
+             ,Custom "style line" ["3","lc","3","lw","3"]
+             ] (map snd zs)
