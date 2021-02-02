@@ -1,4 +1,4 @@
--- Algoritmo multiobjetivo basado en agregación sin restricciones
+-- Algoritmo multiobjetivo basado en agregación sin restriccion
 
 import Funciones.Zdt3
 import Graphics.Gnuplot.Simple
@@ -14,6 +14,13 @@ dib2 =
     plotList [] (take 30 fibs)
     where fibs :: [Double] 
           fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+
+-- Función de redondeo
+
+roundTo :: Double -> Int -> Double
+roundTo x n = (fromIntegral (floor (x * t))) / t
+    where t = 10^n
 
 
 -- Prueba de muestreo de imagenes mediante GNUplot
@@ -34,3 +41,14 @@ foo = do
              , terminal (SVG.cons "./out/output.svg")
              ,Custom "style line" ["3","lc","3","lw","3"]
              ] (map snd zs)
+             
+-- Calculo de los vectores
+
+calc_pesos n = [((roundTo (0+paso*x) 3),(roundTo (1-paso*x) 3))| x <-[0..n-1]]
+    where paso = 1/(n-1)
+
+-- Calculo de la z(?)
+
+calc_z xss = calc_zaux (unzip xss)
+
+calc_zaux (xs,ys) = [minimum xs, minimum ys]
