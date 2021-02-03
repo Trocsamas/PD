@@ -1,10 +1,7 @@
 -- Este fichero contendrá todas las funciones relacionadas 
 -- con la lectura y escritura sobre ficheros
 -- =======================================================
-import System.Environment (getArgs)
-import System.Directory
-import Text.CSV
-import Text.Printf
+
 
 cargaDatos = do  
         let fileName = "./PF.dat"
