@@ -48,7 +48,7 @@ foo = do
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
--- Calculo de la punto Z
+-- Calculo del punto Z
 
 calc_z xss = calc_zaux (unzip xss)
 
@@ -67,5 +67,9 @@ distancias :: Floating a => [(a, a)] -> [[(a, Int)]]
 distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-1]] n
     where n = (length xs)
 
-cal_vecindario xs n t = foldr (\xss ys -> take (truncate (n*t)) (sort xss):ys) dist []
-    where dist = distancias xs
+calc_vecindario :: (Floating a1, Ord a1) => [(a1, a1)] -> Int -> Double -> [[Int]]
+calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] distss
+    where distss = distancias xs
+          trunc  = truncate (fromIntegral n*t)
+          f yst  = foldr (\t js -> snd t :js) [] yst
+
