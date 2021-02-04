@@ -5,6 +5,8 @@ import Graphics.Gnuplot.Simple
 import qualified Graphics.Gnuplot.Terminal.SVG as SVG
 import Data.List
 
+import System.Random
+
 ej1 = zdt3 [8.528997e-01,4.455033e-04,2.023997e-03,5.397792e-03,5.944923e-04,1.067563e-03,3.566097e-03,1.382548e-03,6.985887e-04,1.958344e-04,
           1.076955e-03,1.207479e-03,9.879777e-03,1.368514e-04,9.025464e-04,5.268854e-04,4.552294e-03,1.122561e-05,1.755626e-03,3.247557e-04,
           7.025530e-03,1.466073e-03,2.234936e-05,1.498200e-03,1.303323e-04,1.820097e-03,8.807117e-06,1.728758e-03,5.288978e-04,1.224419e-03]
@@ -73,3 +75,15 @@ calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] dis
           trunc  = truncate (fromIntegral n*t)
           f yst  = foldr (\t js -> snd t :js) [] yst
 
+
+-- Calculo de la Población Inicial
+
+generaIndividuo :: Int -> IO [Double]
+generaIndividuo n = do
+  gen <- newStdGen
+  let xs = randomRs (0,1) gen
+  return (take n xs)
+
+generaPoblacion n = do
+    individuo <- generaIndividuo (30*n)
+    return (parte individuo 30)
