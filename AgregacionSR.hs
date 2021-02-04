@@ -84,6 +84,7 @@ generaIndividuo n = do
   let xs = randomRs (0,1) gen
   return (take n xs)
 
+generaPoblacion :: Int -> IO [[Double]]
 generaPoblacion n = do
     individuo <- generaIndividuo (30*n)
     return (parte individuo 30)
