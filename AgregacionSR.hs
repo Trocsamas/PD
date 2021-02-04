@@ -88,3 +88,7 @@ generaPoblacion :: Int -> IO [[Double]]
 generaPoblacion n = do
     individuo <- generaIndividuo (30*n)
     return (parte individuo 30)
+
+evaluaciones :: Floating a => [[a]] -> [Funciones.Zdt3.Vector a]
+evaluaciones [] = []
+evaluaciones (x:xss) = zdt3 x : evaluaciones xss
