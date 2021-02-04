@@ -52,9 +52,13 @@ calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
 
 -- Calculo del punto Z
 
-calc_z xss = calc_zaux (unzip xss)
+-- calc_z xss = calc_zaux (unzip xss)
 
-calc_zaux (xs,ys) = [minimum xs, minimum ys]
+-- calc_zaux (xs,ys) = [minimum xs, minimum ys]
+--calc_z :: (Floating a, Ord a) => [a] -> Vector a
+calc_z xs = [f1,f2]
+    where f1 = minimum [ x ! 1 | x <- xs]
+          f2 = minimum [ x ! 2| x <- xs]
 
 -- Vencindario
 
@@ -92,3 +96,7 @@ generaPoblacion n = do
 evaluaciones :: Floating a => [[a]] -> [Funciones.Zdt3.Vector a]
 evaluaciones [] = []
 evaluaciones (x:xss) = zdt3 x : evaluaciones xss
+
+-- Calculo de subproblemas
+
+calc_subproblemas eval p z = undefined

@@ -1,5 +1,7 @@
 module Funciones.Zdt3
-(zdt3
+(zdt3,
+listaVector,
+Vector
 ) where
 
 import Data.Array
