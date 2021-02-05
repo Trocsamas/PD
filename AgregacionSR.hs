@@ -4,6 +4,7 @@ import Funciones.Zdt3
 import Graphics.Gnuplot.Simple
 import qualified Graphics.Gnuplot.Terminal.SVG as SVG
 import Data.List
+import Data.Array
 
 import System.Random
 
@@ -52,10 +53,6 @@ calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
 
 -- Calculo del punto Z
 
--- calc_z xss = calc_zaux (unzip xss)
-
--- calc_zaux (xs,ys) = [minimum xs, minimum ys]
---calc_z :: (Floating a, Ord a) => [a] -> Vector a
 calc_z xs = [f1,f2]
     where f1 = minimum [ x ! 1 | x <- xs]
           f2 = minimum [ x ! 2| x <- xs]
