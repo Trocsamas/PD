@@ -19,14 +19,6 @@ dib2 =
     where fibs :: [Double] 
           fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
 
-
--- Función de redondeo
-
-roundTo :: Double -> Int -> Double
-roundTo x n = (fromIntegral (floor (x * t))) / t
-    where t = 10^n
-
-
 -- Prueba de muestreo de imagenes mediante GNUplot
 
 someFunc :: IO ()
@@ -46,6 +38,17 @@ foo = do
              ,Custom "style line" ["3","lc","3","lw","3"]
              ] (map snd zs)
              
+
+-- Funciones de Apoyo
+
+roundTo :: Double -> Int -> Double
+roundTo x n = (fromIntegral (floor (x * t))) / t
+    where t = 10^n
+
+parte :: [a] -> Int -> [[a]]
+parte [] _ = []
+parte xs n = (take n xs) : parte (drop n xs) n
+
 -- Calculo de los vectores
 
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
@@ -57,14 +60,10 @@ calc_z xs = [f1,f2]
     where f1 = minimum [ x ! 1 | x <- xs]
           f2 = minimum [ x ! 2| x <- xs]
 
--- Vencindario
+-- Calculo del Vencindario
 
 distancia_euclidea :: Floating a => (a, a) -> (a, a) -> a
 distancia_euclidea (x1,y1) (x2,y2) = sqrt ((x1-x2)**2 + (y1-y2)**2)
-
-parte :: [a] -> Int -> [[a]]
-parte [] _ = []
-parte xs n = (take n xs) : parte (drop n xs) n
 
 distancias :: Floating a => [(a, a)] -> [[(a, Int)]]
 distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-1]] n
@@ -96,4 +95,18 @@ evaluaciones (x:xss) = zdt3 x : evaluaciones xss
 
 -- Calculo de subproblemas
 
-calc_subproblemas eval p z = undefined
+calc_subproblemas :: (Ix i, Num i, Num b, Ord b) => [Array i b] -> [(b, b)] -> [b] -> [b]
+calc_subproblemas eval pesos z = maximo
+    where resta = [((abs ((x!1)-z!!0),(abs ((x!2)-z!!1))))| x<-eval]
+          maximo = calc_maximo (calc_subproblemas_aux resta pesos)
+
+calc_subproblemas_aux :: (Num a, Num b) => [(a, b)] -> [(a, b)] -> [(a, b)]
+calc_subproblemas_aux resta pesos = [((r1*p1),(r2*p2))| (r1,r2,p1,p2)<-xs]
+    where (resta1,resta2) = unzip resta
+          (pesos1,pesos2) = unzip pesos
+          xs = zip4 resta1 resta2 pesos1 pesos2
+
+calc_maximo :: (Foldable t, Ord a) => [t a] -> [a]
+calc_maximo [] = []
+calc_maximo (x:xs) = maximum x : calc_maximo xs
+    
