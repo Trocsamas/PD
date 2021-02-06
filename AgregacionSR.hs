@@ -58,7 +58,7 @@ calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
 
 calc_z xs = [f1,f2]
     where f1 = minimum [ x ! 1 | x <- xs]
-          f2 = minimum [ x ! 2| x <- xs]
+          f2 = minimum [ x ! 2 | x <- xs]
 
 -- Calculo del Vencindario
 
@@ -114,11 +114,20 @@ calc_maximo (x:xs) = maximum x : calc_maximo xs
 
 -- calc_mutacion vecinos poblacion = elegidos
 
+-- mutaciones dentro del intervalo
 
+mutaciones elegidos f min max = limitador [mutaciones_aux x f|x<-elegidos]  min max
 
-eleccionVecionos xs n = do
-    randoms <- eligeVecino xs n
-    
+limitador [] _ _ = []
+limitador (xs:xss) min max = [(limitador_aux x min max)| x<-xs]:limitador xss min max
+
+limitador_aux x min max
+    | x<min = min
+    | x>max = max
+    |otherwise = x
+
+mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
+
 
 
 eligeVecinos xs n = do
