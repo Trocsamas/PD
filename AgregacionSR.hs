@@ -110,9 +110,33 @@ calc_maximo :: (Foldable t, Ord a) => [t a] -> [a]
 calc_maximo [] = []
 calc_maximo (x:xs) = maximum x : calc_maximo xs
     
--- Calculo de la Mutacion(?)
+-- Calculo del vector Mutante
 
--- calc_mutacion vecinos poblacion = elegidos
+deleteAt :: Int -> [a] -> [a]
+deleteAt idx xs = lft ++ rgt
+  where (lft, (_:rgt)) = splitAt idx xs
+
+randomIndex :: [a] -> IO Int
+randomIndex [] = error "Cannot select an element from an empty list."
+randomIndex list = getStdRandom $ randomR (0, length list - 1)
+
+elige3Vecinos :: [a] -> IO [a]
+elige3Vecinos xs = do
+    let elegidos0 = []
+    let lista0 = xs
+
+    idx1 <- randomIndex lista0
+    let elegidos1 = (lista0 !! idx1):elegidos0
+    let lista1 = deleteAt idx1 lista0
+
+    idx2 <- randomIndex lista1
+    let elegidos2 = (lista1 !! idx2):elegidos1
+    let lista2 = deleteAt idx2 lista1
+
+    idx3 <- randomIndex lista2
+    let elegidos3 = (lista2 !! idx3):elegidos2
+
+    return elegidos3
 
 -- mutaciones dentro del intervalo
 
