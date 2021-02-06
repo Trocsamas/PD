@@ -110,3 +110,18 @@ calc_maximo :: (Foldable t, Ord a) => [t a] -> [a]
 calc_maximo [] = []
 calc_maximo (x:xs) = maximum x : calc_maximo xs
     
+-- Calculo de la Mutacion(?)
+
+-- calc_mutacion vecinos poblacion = elegidos
+
+
+
+eleccionVecionos xs n = do
+    randoms <- eligeVecino xs n
+    
+
+
+eligeVecinos xs n = do
+    gen <- newStdGen
+    let i = randomRs (0,length xs - 1) gen
+    return (take n i)
