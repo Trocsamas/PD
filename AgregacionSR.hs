@@ -138,6 +138,7 @@ elige3Vecinos xs = do
 
     return elegidos3
 
+seleccion_aleatoria :: [a] -> [[Int]] -> IO [[a]]
 seleccion_aleatoria _ [] = do 
     return []
 seleccion_aleatoria poblacion (xs:xss) = do
@@ -147,6 +148,7 @@ seleccion_aleatoria poblacion (xs:xss) = do
     let res = seleccionados:resto 
     return res
 
+seleccion_aleatoria_aux :: [a] -> [Int] -> IO [a]
 seleccion_aleatoria_aux _ [] = do
     return []
 seleccion_aleatoria_aux poblacion (x:xs) = do
@@ -169,9 +171,44 @@ limitador_aux x min max
 
 mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
 
+-- calculo de cruces con vector mutante
+-- cr porcentaje de cruce (Normalmente 0.5)
+
+trial mutantes@(x:xs) individuos@(y:ys) cr = do
+    nuevo_individuo <- cruce_individuo x y cr
+    resto <- trial xs ys cr
+    let res = nuevo_individuo:resto
+    return res
+
+cruce_individuo mutante individuo cr = do
+    cruces <- puntos_de_cruce cr
+    let trial = [if cruces!!x then mutante!!x else individuo!!x | x <- [0..29]]
+    return trial
+
+puntos_de_cruce cr = do
+    individuo <- generaIndividuo 30
+    let cruces = [x < cr | x <- individuo]
+    return cruces
 
 
-eligeVecinos xs n = do
-    gen <- newStdGen
-    let i = randomRs (0,length xs - 1) gen
-    return (take n i)
+
+
+
+
+
+
+
+
+
+
+-- INSTRUCCIONES INICIALES
+--     let p = calc_pesos 20
+--     let vecindario = calc_vecindario p 20 0.3
+--     poblacion <- generaPoblacion 20
+--     let eval = evaluaciones poblacion
+--     let z = calc_z eval
+
+-- INTRUCCIONES TRIAL_VECTORS
+--     selec <- seleccion_aleatoria poblacion vecindario
+--     mutan = mutaciones selec 0.5 0 1
+--     trial mutaN poblacion cr
