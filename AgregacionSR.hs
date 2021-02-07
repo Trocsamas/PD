@@ -138,14 +138,23 @@ elige3Vecinos xs = do
 
     return elegidos3
 
-seleccionAleatoria [] = do 
+seleccion_aleatoria _ [] = do 
     return []
-seleccionAleatoria (xs:xss) = do
+seleccion_aleatoria poblacion (xs:xss) = do
     elegidos <- elige3Vecinos xs
-    resto <- seleccionAleatoria xss
-    let res = elegidos:resto 
+    seleccionados <- seleccion_aleatoria_aux poblacion elegidos
+    resto <- seleccion_aleatoria poblacion xss
+    let res = seleccionados:resto 
     return res
-    
+
+seleccion_aleatoria_aux _ [] = do
+    return []
+seleccion_aleatoria_aux poblacion (x:xs) = do
+    let i = x
+    resto <- seleccion_aleatoria_aux poblacion xs
+    let res = (poblacion!!i):resto
+    return res
+
 -- mutaciones dentro del intervalo
 
 mutaciones elegidos f min max = limitador [mutaciones_aux x f|x<-elegidos]  min max
