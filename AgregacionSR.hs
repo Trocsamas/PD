@@ -174,9 +174,12 @@ mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
 -- calculo de cruces con vector mutante
 -- cr porcentaje de cruce (Normalmente 0.5)
 
-trial mutantes@(x:xs) individuos@(y:ys) cr = do
+evolucion_diferencial [] [] _ = do
+    return []
+
+evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr = do
     nuevo_individuo <- cruce_individuo x y cr
-    resto <- trial xs ys cr
+    resto <- evolucion_diferencial xs ys cr
     let res = nuevo_individuo:resto
     return res
 
@@ -211,4 +214,4 @@ puntos_de_cruce cr = do
 -- INTRUCCIONES TRIAL_VECTORS
 --     selec <- seleccion_aleatoria poblacion vecindario
 --     mutan = mutaciones selec 0.5 0 1
---     trial mutaN poblacion cr
+--     trial mutan poblacion cr
