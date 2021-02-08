@@ -173,10 +173,11 @@ mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
 
 -- calculo de cruces con vector mutante
 -- cr porcentaje de cruce (Normalmente 0.5)
-
+evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial [] [] _ = do
     return []
 
+evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr = do
     nuevo_individuo <- cruce_individuo x y cr
     resto <- evolucion_diferencial xs ys cr
@@ -193,7 +194,14 @@ puntos_de_cruce cr = do
     let cruces = [x < cr | x <- individuo]
     return cruces
 
+-- mutacion Gaussiana
 
+-- Hay que introducir una lista de individuos
+
+mutacion_gaussiana :: [[a]] -> [[a]]
+mutacion_gaussiana = undefined
+
+distribucion_gaussiana x mu de = exp (-((x - mu)^2 / (2*de*de))) / sqrt (2*de*de*pi)
 
 
 
@@ -214,4 +222,4 @@ puntos_de_cruce cr = do
 -- INTRUCCIONES TRIAL_VECTORS
 --     selec <- seleccion_aleatoria poblacion vecindario
 --     mutan = mutaciones selec 0.5 0 1
---     trial mutan poblacion cr
+--     evolucion_diferencial mutan poblacion 0.5
