@@ -49,6 +49,15 @@ parte :: [a] -> Int -> [[a]]
 parte [] _ = []
 parte xs n = (take n xs) : parte (drop n xs) n
 
+deleteAt :: Int -> [a] -> [a]
+deleteAt idx xs = lft ++ rgt
+  where (lft, (_:rgt)) = splitAt idx xs
+
+randomIndex :: [a] -> IO Int
+randomIndex [] = error "Cannot select an element from an empty list."
+randomIndex list = getStdRandom $ randomR (0, length list - 1)
+
+
 -- Calculo de los vectores
 
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
@@ -62,6 +71,12 @@ calc_z xs = [f1,f2]
 
 -- Calculo del Vencindario
 
+calc_vecindario :: (Floating a1, Ord a1) => [(a1, a1)] -> Int -> Double -> [[Int]]
+calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] distss
+    where distss = distancias xs
+          trunc  = truncate (fromIntegral n*t)
+          f yst  = foldr (\t js -> snd t :js) [] yst
+
 distancia_euclidea :: Floating a => (a, a) -> (a, a) -> a
 distancia_euclidea (x1,y1) (x2,y2) = sqrt ((x1-x2)**2 + (y1-y2)**2)
 
@@ -69,14 +84,13 @@ distancias :: Floating a => [(a, a)] -> [[(a, Int)]]
 distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-1]] n
     where n = (length xs)
 
-calc_vecindario :: (Floating a1, Ord a1) => [(a1, a1)] -> Int -> Double -> [[Int]]
-calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] distss
-    where distss = distancias xs
-          trunc  = truncate (fromIntegral n*t)
-          f yst  = foldr (\t js -> snd t :js) [] yst
-
 
 -- Calculo de la Población Inicial
+
+generaPoblacion :: Int -> IO [[Double]]
+generaPoblacion n = do
+    individuo <- generaIndividuo (30*n)
+    return (parte individuo 30)
 
 generaIndividuo :: Int -> IO [Double]
 generaIndividuo n = do
@@ -84,17 +98,14 @@ generaIndividuo n = do
   let xs = randomRs (0,1) gen
   return (take n xs)
 
-generaPoblacion :: Int -> IO [[Double]]
-generaPoblacion n = do
-    individuo <- generaIndividuo (30*n)
-    return (parte individuo 30)
+
+-- Calculo de las Evaluaciones
 
 evaluaciones :: Floating a => [[a]] -> [Funciones.Zdt3.Vector a]
 evaluaciones [] = []
 evaluaciones (x:xss) = zdt3 x : evaluaciones xss
 
 -- Calculo de subproblemas
-
 calc_subproblemas :: (Ix i, Num i, Num b, Ord b) => [Array i b] -> [(b, b)] -> [b] -> [b]
 calc_subproblemas eval pesos z = maximo
     where resta = [((abs ((x!1)-z!!0),(abs ((x!2)-z!!1))))| x<-eval]
@@ -112,13 +123,15 @@ calc_maximo (x:xs) = maximum x : calc_maximo xs
     
 -- Calculo del vector Mutante
 
-deleteAt :: Int -> [a] -> [a]
-deleteAt idx xs = lft ++ rgt
-  where (lft, (_:rgt)) = splitAt idx xs
+calc_mutante vecindario poblacion f cr min max = do
+    seleccion <- seleccion_aleatoria poblacion vecindario
+    let mutantes = mutaciones seleccion f min max
+    mutantes_cruzados <- evolucion_diferencial mutantes poblacion cr
+    mutantes_gaussianos <- mutaciones_gaussianas mutantes_cruzados
+    let mutantes_finales = limitador mutantes_gaussianos min max
+    return mutantes_finales
 
-randomIndex :: [a] -> IO Int
-randomIndex [] = error "Cannot select an element from an empty list."
-randomIndex list = getStdRandom $ randomR (0, length list - 1)
+-- Funciones para el calculo del Vector Mutante
 
 elige3Vecinos :: [a] -> IO [a]
 elige3Vecinos xs = do
@@ -173,21 +186,22 @@ mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
 
 -- calculo de cruces con vector mutante
 -- cr porcentaje de cruce (Normalmente 0.5)
+
 evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial [] [] _ = do
     return []
 
-evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
+--evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr = do
     nuevo_individuo <- cruce_individuo x y cr
     resto <- evolucion_diferencial xs ys cr
-    let res = nuevo_individuo:resto
-    return res
+    let cruzados = nuevo_individuo:resto
+    return cruzados
 
 cruce_individuo mutante individuo cr = do
     cruces <- puntos_de_cruce cr
-    let trial = [if cruces!!x then mutante!!x else individuo!!x | x <- [0..29]]
-    return trial
+    let cruzados = [if cruces!!x then mutante!!x else individuo!!x | x <- [0..29]]
+    return cruzados
 
 puntos_de_cruce cr = do
     individuo <- generaIndividuo 30
@@ -198,14 +212,31 @@ puntos_de_cruce cr = do
 
 -- Hay que introducir una lista de individuos
 
-mutacion_gaussiana :: [[a]] -> [[a]]
-mutacion_gaussiana = undefined
+--mutacion_gaussiana :: [[a]] -> [[a]]
 
-distribucion_gaussiana x mu de = exp (-((x - mu)^2 / (2*de*de))) / sqrt (2*de*de*pi)
-
+-- distribucion_gaussiana x mu de = exp (-((x - mu)^2 / (2*de*de))) / sqrt (2*de*de*pi)
 
 
+            
+mutaciones_gaussianas [] = do 
+    return []
+mutaciones_gaussianas (xs:xss) =do
+    mutacion <- mutacion_gaussiana xs
+    resto <- mutaciones_gaussianas xss
+    return (mutacion:resto)
 
+mutacion_gaussiana [] = do
+    return []
+mutacion_gaussiana (x:xs) = do 
+    rnd <-generaIndividuo 2
+    let res = comprobacion_gauss x rnd
+    resto <- mutacion_gaussiana xs
+    return (res:resto)
+
+comprobacion_gauss x rnd = if ((rnd!!0)<=1/30) then gauss else x
+    where gauss = x + (distribucion_normal (rnd!!1))
+-- Distribucion gaussiana con los valores mu 0 y sigma 1/20
+distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
 
 
 
