@@ -240,8 +240,17 @@ distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
 
 
 
+-- intento de main
+main n g t f cr min max = do
+    let pesos = calc_pesos n
+    let vecindario = calc_vecindario pesos n t
+    poblacion <- generaPoblacion n
+    let eval = evaluaciones poblacion
+    let z = calc_z eval
+    fin <- main_aux pesos vecindario poblacion eval z g f cr min max
+    return fin
 
-
+main_aux pesos vecindario poblacion eval z g f cr min max = undefined
 
 -- INSTRUCCIONES INICIALES
 --     let p = calc_pesos 20
@@ -251,6 +260,4 @@ distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
 --     let z = calc_z eval
 
 -- INTRUCCIONES TRIAL_VECTORS
---     selec <- seleccion_aleatoria poblacion vecindario
---     mutan = mutaciones selec 0.5 0 1
---     evolucion_diferencial mutan poblacion 0.5
+--     calc_mutante vecindario poblacion 0.5 0.5 0 1
