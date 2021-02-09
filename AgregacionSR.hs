@@ -235,12 +235,28 @@ mutacion_gaussiana (x:xs) = do
 
 comprobacion_gauss x rnd = if ((rnd!!0)<=1/30) then gauss else x
     where gauss = x + (distribucion_normal (rnd!!1))
+    
 -- Distribucion gaussiana con los valores mu 0 y sigma 1/20
 distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
 
+actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subproblemas [] pesos z i = (poblacion,eval_poblacion)
 
+actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subproblemas vecindario@(vs:vss) pesos z i = 
+    actualiza_poblacion pobl_act eval_pobl_act mutaciones eval_mutaciones subproblemas vss pesos z (i+1)
+    where (pobl_act,eval_pobl_act)=actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas vs pesos z i
 
+actualiza_aux poblacion eval_poblacion _ _ _ [] _ _ _ = (poblacion,eval_poblacion)
+actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas (v:vs) pesos z i = (actualiza_aux pobl_act eval_pobl_act mutaciones eval_mutaciones subproblemas vs pesos z i)
+    where (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1))
+          producto = [(fst (pesos!!i)) * r1, (snd (pesos!!i)) * r2]
+          (pobl_act,eval_pobl_act) = 
+              if (maximum producto) < (subproblemas!!v) 
+                  then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion) 
+                  else (poblacion,eval_poblacion)
+         
 -- intento de main
+
+{-- 
 main n g t f cr min max = do
     let pesos = calc_pesos n
     let vecindario = calc_vecindario pesos n t
@@ -249,8 +265,9 @@ main n g t f cr min max = do
     let z = calc_z eval
     fin <- main_aux pesos vecindario poblacion eval z g f cr min max
     return fin
-
 main_aux pesos vecindario poblacion eval z g f cr min max = undefined
+--}
+
 
 -- INSTRUCCIONES INICIALES
 --     let p = calc_pesos 20
