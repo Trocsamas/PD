@@ -59,7 +59,7 @@ randomIndex list = getStdRandom $ randomR (0, length list - 1)
 
 
 -- Calculo de los vectores
-
+calc_pesos :: (Enum b, Fractional b) => b -> [(b, b)]
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
@@ -253,7 +253,31 @@ actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas (
               if (maximum producto) < (subproblemas!!v) 
                   then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion) 
                   else (poblacion,eval_poblacion)
-         
+
+
+algoritmo_agregacion_ZDT3 n g t f cr minimo maximo = do
+    let pesos = calc_pesos (fromIntegral n)
+    let vecindario = calc_vecindario pesos n t
+    poblacion <- generaPoblacion n
+    let eval_poblacion = evaluaciones poblacion
+    let z = calc_z eval_poblacion
+    res <-algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr minimo maximo g
+    return res
+
+algoritmo_agregacion_ZDT3_aux _ _ _ _ _ _ _ _ _ 0 = do
+    return []
+    
+algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr minimo maximo g_fin = do
+    mutantes <- calc_mutante vecindario poblacion f cr minimo maximo
+    let eval_mutantes = evaluaciones mutantes
+    let z_mutantes = calc_z eval_mutantes
+    let subproblemas = calc_subproblemas eval_poblacion pesos z
+    let (poblacion_act,eval_poblacion_act) = actualiza_poblacion poblacion eval_poblacion mutantes eval_mutantes subproblemas vecindario pesos z 0
+    let res = (poblacion_act,eval_poblacion_act)
+    resto <-algoritmo_agregacion_ZDT3_aux poblacion_act eval_poblacion_act vecindario pesos z f cr minimo maximo (g_fin-1)
+    return (res:resto)
+    
+    
 -- intento de main
 
 {-- 
