@@ -271,16 +271,19 @@ algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr m
     mutantes <- calc_mutante vecindario poblacion f cr minimo maximo
     let eval_mutantes = evaluaciones mutantes
     let z_mutantes = calc_z eval_mutantes
-    let subproblemas = calc_subproblemas eval_poblacion pesos z
-    let (poblacion_act,eval_poblacion_act) = actualiza_poblacion poblacion eval_poblacion mutantes eval_mutantes subproblemas vecindario pesos z 0
+    let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..2]]
+    let subproblemas = calc_subproblemas eval_poblacion pesos z_act
+    let (poblacion_act,eval_poblacion_act) = actualiza_poblacion poblacion eval_poblacion mutantes eval_mutantes subproblemas vecindario pesos z_act 0
     let res = (poblacion_act,eval_poblacion_act)
-    resto <-algoritmo_agregacion_ZDT3_aux poblacion_act eval_poblacion_act vecindario pesos z f cr minimo maximo (g_fin-1)
+    resto <-algoritmo_agregacion_ZDT3_aux poblacion_act eval_poblacion_act vecindario pesos z_act f cr minimo maximo (g_fin-1)
     return (res:resto)
     
     
 -- intento de main
 
 {-- 
+    let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..2]]
+    
 main n g t f cr min max = do
     let pesos = calc_pesos n
     let vecindario = calc_vecindario pesos n t
