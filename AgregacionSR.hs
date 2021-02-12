@@ -117,9 +117,9 @@ calc_subproblemas_aux resta pesos = [((r1*p1),(r2*p2))| (r1,r2,p1,p2)<-xs]
           (pesos1,pesos2) = unzip pesos
           xs = zip4 resta1 resta2 pesos1 pesos2
 
-calc_maximo :: (Foldable t, Ord a) => [t a] -> [a]
+calc_maximo :: Ord a => [(a, a)] -> [a]
 calc_maximo [] = []
-calc_maximo (x:xs) = maximum x : calc_maximo xs
+calc_maximo (x:xs) = max (fst x) (snd x) : calc_maximo xs
     
 -- Calculo del vector Mutante
 
