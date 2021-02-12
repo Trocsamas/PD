@@ -254,6 +254,11 @@ actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas (
                   then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion)) 
                   else (poblacion,eval_poblacion)
 
+-- PRUEBA
+
+-- actualiza_poblacion p evl tv evlt sub v w z = [if maximum producto < sub!!j then (tv!!i,evlt!!i) else () | i <- [0..n], j <- v!!i, let (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1)), let producto = [(fst (pesos!!j)) * r1, (snd (pesos!!j)) * r2]]
+--      where n = (length v) - 1
+--         introduce 
 
 algoritmo_agregacion_ZDT3 n g t f cr minimo maximo = do
     let pesos = calc_pesos (fromIntegral n)
@@ -261,7 +266,7 @@ algoritmo_agregacion_ZDT3 n g t f cr minimo maximo = do
     poblacion <- generaPoblacion n
     let eval_poblacion = evaluaciones poblacion
     let z = calc_z eval_poblacion
-    res <-algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr minimo maximo g
+    res <- algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr minimo maximo g
     return res
 
 algoritmo_agregacion_ZDT3_aux _ _ _ _ _ _ _ _ _ 0 = do
