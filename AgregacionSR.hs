@@ -248,10 +248,10 @@ actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subprobl
 actualiza_aux poblacion eval_poblacion _ _ _ [] _ _ _ = (poblacion,eval_poblacion)
 actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas (v:vs) pesos z i = (actualiza_aux pobl_act eval_pobl_act mutaciones eval_mutaciones subproblemas vs pesos z i)
     where (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1))
-          producto = [(fst (pesos!!i)) * r1, (snd (pesos!!i)) * r2]
+          producto = [(fst (pesos!!v)) * r1, (snd (pesos!!v)) * r2]
           (pobl_act,eval_pobl_act) = 
               if (maximum producto) < (subproblemas!!v) 
-                  then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion) 
+                  then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion)) 
                   else (poblacion,eval_poblacion)
 
 
@@ -272,6 +272,7 @@ algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr m
     let eval_mutantes = evaluaciones mutantes
     let z_mutantes = calc_z eval_mutantes
     let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..2]]
+    
     let subproblemas = calc_subproblemas eval_poblacion pesos z_act
     let (poblacion_act,eval_poblacion_act) = actualiza_poblacion poblacion eval_poblacion mutantes eval_mutantes subproblemas vecindario pesos z_act 0
     let res = (poblacion_act,eval_poblacion_act)
