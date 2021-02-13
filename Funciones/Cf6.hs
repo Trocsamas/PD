@@ -1,3 +1,8 @@
+module Funciones.Cf6
+(cf6_4,
+cf6_16
+) where
+
 import Data.Array
 
 type Vector a = Array Int a
