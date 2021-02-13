@@ -8,15 +8,16 @@ import Funciones.Cf6
 import System.Random
 
 
-{--
+
 
 --Algoritmo de Agregación con Restricciones mediante CF6
-
+{--
 algoritmo_agregacion_restricciones n g t f cr = do
     let pesos = calc_pesos n
     let vecindario = calc_vecindario pesos n t
-    poblacion <- generaPoblacion n 4
-    (eval_poblacion,restricciones) = evalua_cf6 poblacion
+    poblacion <- generaPoblacion n
+    let eval_aux = unzip (evalua_cf6 poblacion)
+    let (eval_poblacion,restricciones) = (snd eval_aux, fst eval_aux)
     let z = calc_z eval_poblacion
     res <- algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g
     return res
@@ -25,17 +26,17 @@ algoritmo_agregacion_restricciones_aux poblacion eval_poblacion _ _ _ _ _ _ 0 = 
     return []
 algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g = do
     mutantes <- calc_mutantes_restricciones poblacion vecindario f cr
-    (eval_mutantes,restricciones_mutantes) = evalua_cf6 mutantes
-    z_mutante = calc_z eval_mutantes
-    let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..2]]
+    let eval_aux = unzip (evalua_cf6 mutantes)
+    let (eval_mutantes,restricciones_mutantes) = (snd eval_aux, fst eval_aux)
+    let z_mutante = calc_z eval_mutantes
+    let z_act = [if ((z!!x)<(z_mutante!!x)) then z!!x else z_mutante!!x | x <- [0..1]]
     let subproblemas = calc_subproblemas eval_poblacion pesos z_act
-    let (poblacion_act,eval_pobl_act,restricciones_act) = actualiza_poblacion_restricciones poblacion eval_poblacion restricciones eval_mutantes restricciones_mutantes subproblemas vecindario pesos z 0
+    let (poblacion_act,eval_poblacion_act,restricciones_act) = actualiza_poblacion_restricciones poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas vecindario pesos z 0
     
-    let res = (poblacion_act,eval_poblacion_act)
-    resto <-algoritmo_agregacion_restricciones_aux poblacion_act eval_poblacion_act restricciones_act vecindario pesos z_act f cr (g_fin-1)
+    let res = (poblacion_act,eval_poblacion_act,restricciones_act)
+    resto <-algoritmo_agregacion_restricciones_aux poblacion_act eval_poblacion_act restricciones_act vecindario pesos z_act f cr (g-1)
     return (res:resto)
-    
---}
+    --}
 
 parte :: [a] -> Int -> [[a]]
 parte [] _ = []
@@ -80,9 +81,9 @@ generaIndividuo n = do
 
 evalua_cf6 [] = []
 evalua_cf6 poblacion@(xs:xss)
-    | xor (cumple ev2) = (ev1,[ev2!!0,ev2!!1,0]):evalua_cf6 xss
+    | xor (cumple ev2) = (ev1,[ev2!!0,ev2!!1,1]):evalua_cf6 xss
     | and (cumple ev2) = (ev1,[ev2!!0,ev2!!1,0]):evalua_cf6 xss
-    | otherwise = (ev1,[ev2!!0,ev2!!1,0]):evalua_cf6 xss
+    | otherwise = (ev1,[ev2!!0,ev2!!1,2]):evalua_cf6 xss
     where (ev1,ev2) = cf6_4 xs
 
 cumple = foldr (\x acc->(x<0):acc) []
@@ -224,5 +225,52 @@ mutacion_gaussiana (x:xs) i = do
 comprobacion_gauss x rnd sigma = if ((rnd!!0)<=1/4) then gauss else x
     where gauss = x + (distribucion_gaussiana (rnd!!1) 0 sigma)
     
--- Distribucion gaussiana 
+
+        -- Distribucion gaussiana 
 distribucion_gaussiana x mu sigma = exp (-((x - mu)^2 / (2*sigma*sigma))) / sqrt (2*sigma*sigma*pi)
+
+-- Actualizacion de las Poblaciones, Evaluaciones y Restricciones
+
+
+actualiza_poblacion_restricciones poblacion eval_poblacion restricciones _ _ _ _ [] _ _ _ = (poblacion,eval_poblacion,restricciones)
+actualiza_poblacion_restricciones poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas vecindario@(vs:vss) pesos z i = actualiza_poblacion_restricciones poblacion_act eval_poblacion_act restricciones_act mutantes eval_mutantes restricciones_mutantes subproblemas vss pesos z (i+1)
+    where (poblacion_act,eval_poblacion_act,restricciones_act) = actualiza_poblacion_restricciones_aux poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas vs pesos z i
+
+actualiza_poblacion_restricciones_aux poblacion eval_poblacion restricciones _ _ _ _ [] _ _ _ = (poblacion,eval_poblacion,restricciones)
+    
+actualiza_poblacion_restricciones_aux poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas vecinos@(v:vs) pesos z i = actualiza_poblacion_restricciones_aux poblacion_act eval_pobl_act restricciones_act mutantes eval_mutantes restricciones_mutantes subproblemas vs pesos z i
+    where (rest_v,rest_mut_i) = ((restricciones!!v)!!2,(restricciones_mutantes!!i)!!2)
+          (poblacion_act,eval_pobl_act,restricciones_act) = if (and [(rest_v==rest_mut_i),(rest_v==0)]) then (caso1 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas pesos z v i) else if (and [(rest_mut_i>0),(rest_v>0)]) then (caso2 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes v i) else if (and [(rest_mut_i==0),(rest_v>0)]) then (caso3 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes v i) else (poblacion,eval_poblacion,restricciones)
+          
+caso1 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas pesos z v i= (poblacion_act,eval_poblacion_act,restricciones_act)
+    where (r1,r2) = (abs ((eval_mutantes!!i)!1 - z!!0),abs ((eval_mutantes!!i)!2 - z!!1))
+          producto = [(fst (pesos!!v)) * r1, (snd (pesos!!v)) * r2]
+          (poblacion_act,eval_poblacion_act,restricciones_act) = 
+              if (maximum producto) < (subproblemas!!v)
+                  then ((take v poblacion ++ [mutantes!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutantes!!i] ++ drop (v + 1) eval_poblacion),(take v restricciones ++ [restricciones_mutantes!!i] ++ drop (v + 1) restricciones)) 
+                  else (poblacion,eval_poblacion,restricciones)
+                  
+caso2 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes v i= (poblacion_act,eval_poblacion_act,restricciones_act)
+    where error_hijo = sum [((restricciones!!v)!!x)|x<-[0,1],((restricciones!!v)!!x)<0] 
+          error_padre = sum [((restricciones_mutantes!!v)!!x)|x<-[0,1],((restricciones_mutantes!!v)!!x)<0]
+          (poblacion_act,eval_poblacion_act,restricciones_act) = 
+              if error_hijo > error_padre
+                  then ((take v poblacion ++ [mutantes!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutantes!!i] ++ drop (v + 1) eval_poblacion),(take v restricciones ++ [restricciones_mutantes!!i] ++ drop (v + 1) restricciones)) 
+                  else (poblacion,eval_poblacion,restricciones)
+                  
+caso3 poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes v i= (poblacion_act,eval_poblacion_act,restricciones_act)
+    where (poblacion_act,eval_poblacion_act,restricciones_act) = if (v == i)
+           then ((take v poblacion ++ [mutantes!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutantes!!i] ++ drop (v + 1) eval_poblacion),(take v restricciones ++ [restricciones_mutantes!!i] ++ drop (v + 1) restricciones)) 
+           else (poblacion,eval_poblacion,restricciones)
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
