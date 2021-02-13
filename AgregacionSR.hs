@@ -191,7 +191,7 @@ evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial [] [] _ = do
     return []
 
---evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
+
 evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr = do
     nuevo_individuo <- cruce_individuo x y cr
     resto <- evolucion_diferencial xs ys cr
@@ -213,10 +213,6 @@ puntos_de_cruce cr = do
 -- Hay que introducir una lista de individuos
 
 --mutacion_gaussiana :: [[a]] -> [[a]]
-
--- distribucion_gaussiana x mu de = exp (-((x - mu)^2 / (2*de*de))) / sqrt (2*de*de*pi)
-
-
             
 mutaciones_gaussianas [] = do 
     return []
@@ -238,6 +234,7 @@ comprobacion_gauss x rnd = if ((rnd!!0)<=1/30) then gauss else x
     
 -- Distribucion gaussiana con los valores mu 0 y sigma 1/20
 distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
+-- distribucion_gaussiana x mu de = exp (-((x - mu)^2 / (2*de*de))) / sqrt (2*de*de*pi)
 
 actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subproblemas [] pesos z i = (poblacion,eval_poblacion)
 
@@ -250,15 +247,14 @@ actualiza_aux poblacion eval_poblacion mutaciones eval_mutaciones subproblemas (
     where (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1))
           producto = [(fst (pesos!!v)) * r1, (snd (pesos!!v)) * r2]
           (pobl_act,eval_pobl_act) = 
-              if (maximum producto) < (subproblemas!!v) 
+              if (maximum producto) < (subproblemas!!v)
                   then ((take v poblacion ++ [mutaciones!!i] ++ drop (v + 1) poblacion),(take v eval_poblacion ++ [eval_mutaciones!!i] ++ drop (v + 1) eval_poblacion)) 
                   else (poblacion,eval_poblacion)
 
 -- PRUEBA
 
--- actualiza_poblacion p evl tv evlt sub v w z = [if maximum producto < sub!!j then (tv!!i,evlt!!i) else () | i <- [0..n], j <- v!!i, let (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1)), let producto = [(fst (pesos!!j)) * r1, (snd (pesos!!j)) * r2]]
+-- actualiza_poblacion p evl tv evlt sub v w z = [if maximum producto < sub!!j then (tv!!i,evlt!!i) else (tv!!i,evlt!!i) | i <- [0..n], j <- v!!i, let (r1,r2) = (abs ((eval_mutaciones!!i)!1 - z!!0),abs ((eval_mutaciones!!i)!2 - z!!1)), let producto = [(fst (pesos!!j)) * r1, (snd (pesos!!j)) * r2]]
 --      where n = (length v) - 1
---         introduce 
 
 algoritmo_agregacion_ZDT3 n g t f cr minimo maximo = do
     let pesos = calc_pesos (fromIntegral n)
@@ -276,7 +272,7 @@ algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr m
     mutantes <- calc_mutante vecindario poblacion f cr minimo maximo
     let eval_mutantes = evaluaciones mutantes
     let z_mutantes = calc_z eval_mutantes
-    let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..2]]
+    let z_act = [if ((z!!x)<(z_mutantes!!x)) then z!!x else z_mutantes!!x | x <- [0..1]]
     
     let subproblemas = calc_subproblemas eval_poblacion pesos z_act
     let (poblacion_act,eval_poblacion_act) = actualiza_poblacion poblacion eval_poblacion mutantes eval_mutantes subproblemas vecindario pesos z_act 0
