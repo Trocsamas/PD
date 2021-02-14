@@ -1,5 +1,6 @@
 module Funciones.Cf6
-(cf6
+(cf6,
+Vector
 ) where
 
 import Data.Array
