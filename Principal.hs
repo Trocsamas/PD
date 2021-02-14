@@ -2,6 +2,7 @@
 import Graphics.Gnuplot.Simple
 import qualified Graphics.Gnuplot.Terminal.SVG as SVG
 import Funciones.FileTreatment
+import System.Directory
 import System.IO
 import AgregacionSR
 import AgregacionCR
@@ -101,12 +102,14 @@ siguiente_accion_zdt3 last_gen = do
 
 visualizar_fichero_cf6 = do
     time <- getCurrentTime
-    datos <- cargaDatos ("Datos_CF6"++ (take 10 (show time)) ++ ".dat")
+    createDirectoryIfMissing True "out"
+    datos <- cargaDatos ("out/Datos_CF6"++ (take 10 (show time)) ++ ".dat")
     plotList [Key Nothing, XRange (0,1), YRange(0,1)] datos
     
 visualizar_fichero_zdt3 = do
     time <- getCurrentTime
-    datos <- cargaDatos ("Datos_ZDT3"++ (take 10 (show time)) ++ ".dat")
+    createDirectoryIfMissing True "out"
+    datos <- cargaDatos ("out/Datos_ZDT3"++ (take 10 (show time)) ++ ".dat")
     plotDots [Key Nothing, XRange (0,1), YRange(-1,1)] datos
     
 siguiente_accion_cf6 last_gen = do

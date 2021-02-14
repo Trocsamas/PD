@@ -40,13 +40,13 @@ aNumero (x:xss) = (read (x!!0),read (x!!1)):aNumero xss
 guardar_datos_cf6 last_gen = do
     time<-getCurrentTime
     let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
-    writeFile ("Datos_CF6"++ (take 10 (show time)) ++ ".dat") (unwords escribe)
+    writeFile ("out/Datos_CF6"++ (take 10 (show time)) ++ ".dat") (unwords escribe)
     return ()
 
 guardar_datos_zdt3 last_gen = do
     time<-getCurrentTime
     let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
-    writeFile ("Datos_ZDT3"++ (take 10 (show time)) ++".dat") (unwords escribe)
+    writeFile ("out/Datos_ZDT3"++ (take 10 (show time)) ++".dat") (unwords escribe)
     return ()
    
 -- F por Windows
