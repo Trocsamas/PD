@@ -11,8 +11,8 @@ listaVector :: Num a => [a] -> Vector a
 listaVector xs = listArray (1,n) xs
     where n = length xs
 
-cf6_4 :: (Ord a, Floating a) => [a] -> ([a],[a])
-cf6_4 xs = ([f1,f2],[restriccion1,restriccion2])
+cf6_4 :: (Ord a, Floating a) => [a] -> (Vector a,[a])
+cf6_4 xs = (listaVector [f1,f2],[restriccion1,restriccion2])
     where f1    = x0 + sum1
           f2    = (1 - x0) * (1 - x0) + sum2
           sum1  = sum [ yj x * yj x | x <- [2..4],  (mod x 2) == 1]
@@ -28,8 +28,8 @@ cf6_4 xs = ([f1,f2],[restriccion1,restriccion2])
           x1 = xs !! 1
           x3 = xs !! 3
 
-cf6_16 :: (Ord a, Floating a) => [a] -> ([a],[a])
-cf6_16 xs = ([f1,f2],[restriccion1,restriccion2])
+cf6_16 :: (Ord a, Floating a) => [a] -> (Vector a,[a])
+cf6_16 xs = (listaVector [f1,f2],[restriccion1,restriccion2])
     where f1    = x0 + sum1
           f2    = (1 - x0) * (1 - x0) + sum2
           sum1  = sum [ yj x * yj x | x <- [2..16],  (mod x 2) == 1]
