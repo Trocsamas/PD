@@ -39,12 +39,27 @@ parte [] _ = []
 parte xs n = (take n xs) : parte (drop n xs) n
 
 -- Cálculo de los vectores de pesos
+-- =========================================================================
+-- Se crea un conjunto de vectores peso de tamaño N), cumpliéndose que la 
+-- suma de los componentes de cada vector es la unidad y dichos vectores 
+-- peso están repartidos uniformemente.
+-- Esto se consigue partiendo del vector (0,1) y calculando el paso a dar al 
+-- siguiente vector para que quede uniformemente repartido paso = 1 / N−1
+-- =========================================================================
+
 
 calc_pesos :: (Enum b, Fractional b) => b -> [(b, b)]
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
 -- Cálculo del Vecindario
+
+-- =========================================================================
+-- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
+-- aplicamos la fórmula:
+-- vi (G + 1) = x r1(G) + F ∗ (xr2 (G) − xr3(G))
+-- F es un parámetro de mutación, el cual tendrá un valor de 0.5
+-- =========================================================================
 
 calc_vecindario :: (Floating a1, Ord a1) => [(a1, a1)] -> Int -> Double -> [[Int]]
 calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] distss
@@ -62,10 +77,16 @@ distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-
 
 -- Generación de las Población
 
+-- =========================================================================
+-- Para generar una población inicial, hemos hecho uso de la libreria 
+-- System.Random, que genera números aleatorios tomando valores entre 0 y 1, 
+-- que nosotros hemos agrupado en N listas de M valores.
+-- =========================================================================
+
 generaPoblacion :: Int -> Int -> IO [[Double]]
-generaPoblacion n dimension = do
-    individuo <- generaIndividuo (n*dimension)
-    return (parte individuo dimension)
+generaPoblacion n m = do
+    individuo <- generaIndividuo (n*m)
+    return (parte individuo m)
 
 generaIndividuo :: Int -> IO [Double]
 generaIndividuo n = do

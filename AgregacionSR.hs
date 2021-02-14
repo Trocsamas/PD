@@ -32,11 +32,27 @@ algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr m
 
 -- -- Cálculo de los Vectores de Pesos
 
+-- =========================================================================
+-- Se crea un conjunto de vectores peso de tamaño N), cumpliéndose que la 
+-- suma de los componentes de cada vector es la unidad y dichos vectores 
+-- peso están repartidos uniformemente.
+-- Esto se consigue partiendo del vector (0,1) y calculando el paso a dar al 
+-- siguiente vector para que quede uniformemente repartido paso = 1 / N−1
+-- =========================================================================
+
+
 calc_pesos :: (Enum b, Fractional b) => b -> [(b, b)]
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
 -- -- Cálculo del Vecindario
+
+-- =========================================================================
+-- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
+-- aplicamos la fórmula:
+-- vi (G + 1) = x r1(G) + F ∗ (xr2 (G) − xr3(G))
+-- F es un parámetro de mutación, el cual tendrá un valor de 0.5
+-- =========================================================================
 
 calc_vecindario :: (Floating a1, Ord a1) => [(a1, a1)] -> Int -> Double -> [[Int]]
 calc_vecindario xs n t = foldr (\xst ys -> f (take trunc (sort xst)):ys ) [] distss
@@ -56,6 +72,11 @@ parte [] _ = []
 parte xs n = (take n xs) : parte (drop n xs) n 
 
 -- -- Cálculo de la Población Inicial
+-- =========================================================================
+-- Para generar una población inicial, hemos hecho uso de la libreria 
+-- System.Random, que genera números aleatorios tomando valores entre 0 y 1, 
+-- que nosotros hemos agrupado en N listas de 30 valores.
+-- =========================================================================
 
 generaPoblacion :: Int -> IO [[Double]]
 generaPoblacion n = do
@@ -74,7 +95,6 @@ evaluaciones :: Floating a => [[a]] -> [Funciones.Zdt3.Vector a]
 evaluaciones [] = []
 evaluaciones (x:xss) = zdt3 x : evaluaciones xss 
     
-    -- Cálculo del punto Z
 
 -- -- Cálculo del Punto Z
     
@@ -84,6 +104,12 @@ calc_z xs = [f1,f2]
           f2 = minimum [ x ! 2 | x <- xs]
     
 -- -- Cálculo del vector Mutante
+
+-- =========================================================================
+-- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
+-- aplicamos la fórmula: vi (G + 1) = xr1(G) + F ∗ (xr2 (G) − xr3(G))
+-- F es un parámetro de mutación, el cual tendrá un valor de 0.5
+-- =========================================================================
 
 calc_mutante :: [[Int]] -> [[Double]] -> Double -> Double -> Double -> Double -> IO [[Double]]
 calc_mutante vecindario poblacion f cr min max = do
@@ -155,8 +181,17 @@ limitador_aux x min max
     |otherwise = x
 
 -- -- -- -- Cálculo de cruces con vector mutante
--- -- -- -- cr porcentaje de cruce (Normalmente 0.5)
-        
+
+-- =========================================================================
+-- Generamos una lista de True o False del tamaño de la dimensión del
+-- problema, generando números aleatorios y comparando si el valor es menor
+-- que el parámetro CR de cruce. Este parámetro también tendrá un valor de
+-- 0.5.
+-- Tras esto, para cada vector/individuo y su vector mutante, se seleccionan
+-- los genes entre el vector/individuo y el vector mutante para conformar un
+-- nuevo vector/individuo.
+-- =========================================================================
+
 evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
 evolucion_diferencial [] [] _ = do
     return []
@@ -177,6 +212,13 @@ puntos_de_cruce cr = do
     return cruces
 
 -- -- -- -- Mutacion Gaussianas
+
+-- =========================================================================
+-- Para introducir un poco más de diversidad en la búsqueda, aplicaremos
+-- este tipo de mutación.La probabilidad de mutación de un gen será 1/p,
+-- donde p es la dimensión del vector/individuo, y la desviación estándar 
+-- σ =(XU − XL)/20
+-- =========================================================================
 
 mutaciones_gaussianas :: [[Double]] -> IO [[Double]]
 mutaciones_gaussianas [] = do 
