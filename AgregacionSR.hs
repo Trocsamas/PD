@@ -1,3 +1,7 @@
+module AgregacionSR
+(algoritmo_agregacion_ZDT3
+) where
+
 -- Algoritmo multiobjetivo basado en agregación sin restriccion
 
 import Funciones.Zdt3

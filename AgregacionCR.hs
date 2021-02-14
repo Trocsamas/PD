@@ -1,3 +1,7 @@
+module AgregacionCR
+(algoritmo_agregacion_restricciones
+) where
+
 import Data.List
 import Data.Array
 import Funciones.Cf6
