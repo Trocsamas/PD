@@ -1,5 +1,3 @@
--- Aquí vamos a hacer el algoritmo de agregación con el manejo de restricciones
-
 import Graphics.Gnuplot.Simple
 import qualified Graphics.Gnuplot.Terminal.SVG as SVG
 import Data.List
@@ -12,21 +10,21 @@ import System.Random
 
 --Algoritmo de Agregación con Restricciones mediante CF6
 
-algoritmo_agregacion_restricciones n g t f cr = do
+algoritmo_agregacion_restricciones n g t f cr dimension = do
     let pesos = calc_pesos (fromIntegral n)
     let vecindario = calc_vecindario pesos n t
-    poblacion <- generaPoblacion n
-    let eval_aux = unzip (evalua_cf6 poblacion)
+    poblacion <- generaPoblacion n dimension
+    let eval_aux = unzip (evalua_cf6 poblacion dimension)
     let (eval_poblacion,restricciones) = (fst eval_aux, snd eval_aux)
     let z = calc_z eval_poblacion
-    res <- algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g
+    res <- algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z dimension f cr g
     return res
 
-algoritmo_agregacion_restricciones_aux poblacion eval_poblacion _ _ _ _ _ _ 0 = do 
+algoritmo_agregacion_restricciones_aux poblacion eval_poblacion _ _ _ _ _ _ _ 0 = do 
     return []
-algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g = do
-    mutantes <- calc_mutantes_restricciones poblacion vecindario f cr
-    let eval_aux = unzip (evalua_cf6 mutantes)
+algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z dimension f cr g = do
+    mutantes <- calc_mutantes_restricciones poblacion vecindario f cr dimension
+    let eval_aux = unzip (evalua_cf6 mutantes dimension)
     let (eval_mutantes,restricciones_mutantes) = (fst eval_aux, snd eval_aux)
     let z_mutante = calc_z eval_mutantes
     let z_act = [if ((z!!x)<(z_mutante!!x)) then z!!x else z_mutante!!x | x <- [0..1]]
@@ -34,7 +32,7 @@ algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones ve
     let (poblacion_act,eval_poblacion_act,restricciones_act) = actualiza_poblacion_restricciones poblacion eval_poblacion restricciones mutantes eval_mutantes restricciones_mutantes subproblemas vecindario pesos z 0
     
     let res = (poblacion_act,eval_poblacion_act,restricciones_act)
-    resto <-algoritmo_agregacion_restricciones_aux poblacion_act eval_poblacion_act restricciones_act vecindario pesos z_act f cr (g-1)
+    resto <-algoritmo_agregacion_restricciones_aux poblacion_act eval_poblacion_act restricciones_act vecindario pesos z_act dimension f cr (g-1)
     return (res:resto)
 
 
@@ -66,10 +64,10 @@ distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-
 
 -- Generación de las Población
 
-generaPoblacion :: Int -> IO [[Double]]
-generaPoblacion n = do
-    individuo <- generaIndividuo (n*4)
-    return (parte individuo 4)
+generaPoblacion :: Int -> Int -> IO [[Double]]
+generaPoblacion n dimension = do
+    individuo <- generaIndividuo (n*dimension)
+    return (parte individuo dimension)
 
 generaIndividuo :: Int -> IO [Double]
 generaIndividuo n = do
@@ -79,12 +77,12 @@ generaIndividuo n = do
 
 -- Evaluación de la Población mediante CF6 
 
-evalua_cf6 [] = []
-evalua_cf6 poblacion@(xs:xss)
-    | xor (cumple ev2) = (ev1,[ev2!!0,ev2!!1,1]):evalua_cf6 xss
-    | and (cumple ev2) = (ev1,[ev2!!0,ev2!!1,0]):evalua_cf6 xss
-    | otherwise = (ev1,[ev2!!0,ev2!!1,2]):evalua_cf6 xss
-    where (ev1,ev2) = cf6_4 xs
+evalua_cf6 [] dimension = []
+evalua_cf6 poblacion@(xs:xss) dimension 
+    | xor (cumple ev2) = (ev1,[ev2!!0,ev2!!1,1]):evalua_cf6 xss dimension
+    | and (cumple ev2) = (ev1,[ev2!!0,ev2!!1,0]):evalua_cf6 xss dimension
+    | otherwise = (ev1,[ev2!!0,ev2!!1,2]):evalua_cf6 xss dimension
+    where (ev1,ev2) = cf6 xs dimension
 
 cumple = foldr (\x acc->(x<0):acc) []
 xor xs = xs!!0 /= xs!!1 
@@ -115,12 +113,12 @@ calc_maximo (x:xs) = max (fst x) (snd x) : calc_maximo xs
 
 -- Cálculo del Vector Mutante con Restricciones
 
-calc_mutantes_restricciones poblacion vecindario f cr = do
+calc_mutantes_restricciones poblacion vecindario f cr dimension= do
     seleccion <- seleccion_aleatoria poblacion vecindario
     let mutantes = mutaciones seleccion f (-2) 2
     let mutantes_limitados = limitador mutantes 0 1
-    mutantes_cruzados <- evolucion_diferencial mutantes poblacion cr
-    mutantes_gaussianos <- mutaciones_gaussianas mutantes_cruzados 
+    mutantes_cruzados <- evolucion_diferencial mutantes poblacion cr dimension
+    mutantes_gaussianos <- mutaciones_gaussianas mutantes_cruzados (fromIntegral dimension)
     let mutantes_gaussianos_limitados = limitador mutantes_gaussianos (-2) 2
     let mutantes_finales = limitador_primero mutantes_gaussianos_limitados
     return mutantes_finales
@@ -188,41 +186,41 @@ limitador_aux x min max
 
 mutaciones_aux (i0:i1:i2:_) f = zipWith (+) i0 [f*x| x<-(zipWith (-) i1 i2)]
 
-evolucion_diferencial :: [[a]] -> [[a]] -> Double -> IO [[a]]
-evolucion_diferencial [] [] _ = do
+evolucion_diferencial :: [[a]] -> [[a]] -> Double -> Int -> IO [[a]]
+evolucion_diferencial [] [] _ _ = do
     return []
-evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr = do
-    nuevo_individuo <- cruce_individuo x y cr
-    resto <- evolucion_diferencial xs ys cr
+evolucion_diferencial mutantes@(x:xs) individuos@(y:ys) cr dimension = do
+    nuevo_individuo <- cruce_individuo x y cr dimension
+    resto <- evolucion_diferencial xs ys cr dimension
     let cruzados = nuevo_individuo:resto
     return cruzados
     
-cruce_individuo mutante individuo cr = do
-    cruces <- puntos_de_cruce cr
-    let cruzados = [if cruces!!x then mutante!!x else individuo!!x | x <- [0..3]]
+cruce_individuo mutante individuo cr dimension = do
+    cruces <- puntos_de_cruce cr dimension
+    let cruzados = [if cruces!!x then mutante!!x else individuo!!x | x <- [0..(dimension-1)]]
     return cruzados
 
-puntos_de_cruce cr = do
-    individuo <- generaIndividuo 4
+puntos_de_cruce cr dimension= do
+    individuo <- generaIndividuo dimension
     let cruces = [x < cr | x <- individuo]
     return cruces
     
-mutaciones_gaussianas [] = do 
+mutaciones_gaussianas [] _ = do 
     return []
-mutaciones_gaussianas (xs:xss) =do
-    mutacion <- mutacion_gaussiana xs 0
-    resto <- mutaciones_gaussianas xss
+mutaciones_gaussianas (xs:xss) dimension =do
+    mutacion <- mutacion_gaussiana xs 0 dimension
+    resto <- mutaciones_gaussianas xss dimension
     return (mutacion:resto)
 
-mutacion_gaussiana [] _ = do
+mutacion_gaussiana [] _ _ = do
     return []
-mutacion_gaussiana (x:xs) i = do 
+mutacion_gaussiana (x:xs) i dimension = do 
     rnd <-generaIndividuo 2
-    let res = if (i == 0) then comprobacion_gauss x rnd (1/20) else comprobacion_gauss x rnd (1/5)
-    resto <- mutacion_gaussiana xs (i+1)
+    let res = if (i == 0) then comprobacion_gauss x rnd (1/20) dimension else comprobacion_gauss x rnd (1/5) dimension
+    resto <- mutacion_gaussiana xs (i+1) dimension
     return (res:resto)
 
-comprobacion_gauss x rnd sigma = if ((rnd!!0)<=1/4) then gauss else x
+comprobacion_gauss x rnd sigma dimension = if ((rnd!!0)<=1/dimension) then gauss else x
     where gauss = x + (distribucion_gaussiana (rnd!!1) 0 sigma)
     
 
