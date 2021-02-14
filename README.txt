@@ -20,3 +20,7 @@ Si nos diese el siguiente error,
     Could not load module ‘System.Random’
 simplemente tendremos que ejecutar
     ghc -o Principal.hs principal.exe -package random
+
+Lanzar programa desde consola con:
+	./principal.exe
+o haciendo doble clic.
