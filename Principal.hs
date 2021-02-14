@@ -27,7 +27,8 @@ funcionZDT3 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_ZDT3 p g t f cr 0 1
     let final = nuevaSolucionZDT3 solucion
-    return (selecciona_evaluaciones_de_generacionZDT3 100 final)
+    putStr $ show (selecciona_evaluaciones_de_generacionZDT3 100 final)
+    return ()
 
 funcionCF6_4 = do
     hSetBuffering stdout NoBuffering
@@ -50,7 +51,11 @@ funcionCF6_4 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_restricciones p g t f cr 4
     let final = nuevaSolucionCF6 solucion
-    return (selecciona_evaluaciones_de_generacionCF6 100 final)
+
+    
+
+    putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
+    return ()
 
 funcionCF6_16 = do
     hSetBuffering stdout NoBuffering
@@ -73,7 +78,8 @@ funcionCF6_16 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_restricciones p g t f cr 16
     let final = nuevaSolucionCF6 solucion
-    return (selecciona_evaluaciones_de_generacionCF6 100 final)
+    putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
+    return ()
 
 main = do
     hSetBuffering stdout NoBuffering
