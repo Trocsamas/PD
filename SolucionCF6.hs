@@ -2,7 +2,7 @@ module SolucionCF6
     (SolucionCF6,
      nuevaSolucionCF6,
      generacionCF6,
-     selecciona_individus_de_generacionCF6,
+     selecciona_individuos_de_generacionCF6,
      selecciona_evaluaciones_de_generacionCF6,
      selecciona_restricciones_de_generacionCF6
     ) where
@@ -11,7 +11,7 @@ import Data.Array
 
 -- Definición de solucion
 newtype SolucionCF6 = S [([[Double]], [Array Int Double], [[Double]])]
-
+    deriving Show
 -- Crea tipo
 nuevaSolucionCF6 :: [([[Double]], [Array Int Double], [[Double]])] -> SolucionCF6
 nuevaSolucionCF6 sol = S sol
@@ -21,8 +21,8 @@ generacionCF6 :: Int -> SolucionCF6 -> ([[Double]], [Array Int Double], [[Double
 generacionCF6 x (S sol) = sol!!(x-1)
 
 -- Seleccionar individuos de una generación
-selecciona_individus_de_generacionCF6 :: Int -> SolucionCF6 -> [[Double]]
-selecciona_individus_de_generacionCF6 x (S sol) = fst' (sol!!(x-1))
+selecciona_individuos_de_generacionCF6 :: Int -> SolucionCF6 -> [[Double]]
+selecciona_individuos_de_generacionCF6 x (S sol) = fst' (sol!!(x-1))
 
 -- Seleccionar evaluaciones de una generación
 selecciona_evaluaciones_de_generacionCF6 :: Int -> SolucionCF6 -> [(Double, Double)]

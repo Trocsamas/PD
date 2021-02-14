@@ -1,10 +1,20 @@
--- Este fichero contendrá todas las funciones relacionadas 
+module Funciones.FileTreatment
+(guardar_datos_zdt3,
+guardar_datos_cf6,
+cargaDatos
+) where
+    -- Este fichero contendrá todas las funciones relacionadas 
 -- con la lectura y escritura sobre ficheros
 -- =======================================================
 
-cargaDatos :: IO [(Double, Double)]
-cargaDatos = do  
-        let fileName = "./PF.dat"
+import Data.Char
+import Data.Time
+import SolucionCF6
+import SolucionZDT3
+
+cargaDatos :: [Char] -> IO [(Double, Double)]
+cargaDatos fileName = do  
+        let file = fileName
         dat <- readFile fileName
         let lineas = lines dat
         return (aNumero (datos lineas)) 
@@ -27,5 +37,17 @@ aNumero [] = []
 aNumero (x:xss) = (read (x!!0),read (x!!1)):aNumero xss
 
 
+guardar_datos_cf6 last_gen = do
+    time<-getCurrentTime
+    let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
+    writeFile ("Datos_CF6"++ (take 10 (show time)) ++ ".dat") (unwords escribe)
+    return ()
+
+guardar_datos_zdt3 last_gen = do
+    time<-getCurrentTime
+    let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
+    writeFile ("Datos_ZDT3"++ (take 10 (show time)) ++".dat") (unwords escribe)
+    return ()
+   
 -- F por Windows
 -- plotDots [Key Nothing, XRange (-0.1,1.1), YRange(-1.1,1.1)] a

@@ -1,10 +1,13 @@
 -- En este archivo se realiza el control interactivo del programa con el usuario
-
+import Graphics.Gnuplot.Simple
+import qualified Graphics.Gnuplot.Terminal.SVG as SVG
+import Funciones.FileTreatment
 import System.IO
 import AgregacionSR
 import AgregacionCR
 import SolucionZDT3
 import SolucionCF6
+import Data.Time
 
 funcionZDT3 = do
     hSetBuffering stdout NoBuffering
@@ -27,6 +30,8 @@ funcionZDT3 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_ZDT3 p g t f cr 0 1
     let final = nuevaSolucionZDT3 solucion
+    let last_gen = selecciona_evaluaciones_de_generacionZDT3 (length (solucion)) final
+    siguiente_accion_zdt3 last_gen
     putStr $ show (selecciona_evaluaciones_de_generacionZDT3 100 final)
     return ()
 
@@ -51,9 +56,8 @@ funcionCF6_4 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_restricciones p g t f cr 4
     let final = nuevaSolucionCF6 solucion
-
-    
-
+    let last_gen = selecciona_evaluaciones_de_generacionCF6 (length (solucion)) final
+    siguiente_accion_cf6 last_gen
     putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
@@ -78,9 +82,46 @@ funcionCF6_16 = do
     let cr = read cruce :: Double
     solucion <- algoritmo_agregacion_restricciones p g t f cr 16
     let final = nuevaSolucionCF6 solucion
+    let last_gen = selecciona_evaluaciones_de_generacionCF6 (length (solucion)) final
+    siguiente_accion_cf6 last_gen
     putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
+siguiente_accion_zdt3 last_gen = do
+    hSetBuffering stdout NoBuffering    
+    putStrLn "\nSeleccione la acción que desea realizar:\n"
+    putStrLn "\t1. Guardar las generaciones"
+    putStrLn "\t2. Volver al menú principal"
+    putStrLn "\t3. Salir"
+    o <- getLine
+    case o of "1" -> guardar_datos_zdt3 last_gen >> visualizar_fichero_zdt3
+              "2" -> main
+              "3" -> return ()
+              _ -> putStrLn "\nNo ha seleccionado un indice correcto, vuelva a intentarlo" >> siguiente_accion_zdt3 last_gen
+
+visualizar_fichero_cf6 = do
+    time <- getCurrentTime
+    datos <- cargaDatos ("Datos_CF6"++ (take 10 (show time)) ++ ".dat")
+    plotDots [Key Nothing, XRange (0,1), YRange(0,1)] datos
+    
+visualizar_fichero_zdt3 = do
+    time <- getCurrentTime
+    datos <- cargaDatos ("Datos_ZDT3"++ (take 10 (show time)) ++ ".dat")
+    plotDots [Key Nothing, XRange (0,1), YRange(-1,1)] datos
+    
+siguiente_accion_cf6 last_gen = do
+    hSetBuffering stdout NoBuffering
+    putStrLn "\nSeleccione la acción que desea realizar:\n"
+    putStrLn "\t1. Guardar las generaciones"
+    putStrLn "\t2. Volver al menú principal"
+    putStrLn "\t3. Salir"
+    o <- getLine
+    case o of "1" -> guardar_datos_cf6 last_gen >> visualizar_fichero_cf6
+              "2" -> main
+              "3" -> return ()
+              _ -> putStrLn "\nNo ha seleccionado un indice correcto, vuelva a intentarlo" >> siguiente_accion_cf6 last_gen
+
+    
 main = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nSeleccione la función que desea optimizar:\n"
