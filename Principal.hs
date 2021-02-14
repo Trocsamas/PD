@@ -102,7 +102,7 @@ siguiente_accion_zdt3 last_gen = do
 visualizar_fichero_cf6 = do
     time <- getCurrentTime
     datos <- cargaDatos ("Datos_CF6"++ (take 10 (show time)) ++ ".dat")
-    plotDots [Key Nothing, XRange (0,1), YRange(0,1)] datos
+    plotList [Key Nothing, XRange (0,1), YRange(0,1)] datos
     
 visualizar_fichero_zdt3 = do
     time <- getCurrentTime
