@@ -37,17 +37,19 @@ aNumero [] = []
 aNumero (x:xss) = (read (x!!0),read (x!!1)):aNumero xss
 
 
+guardar_datos_cf6 :: (Show a1, Show a2) => [(a1, a2)] -> IO ()
 guardar_datos_cf6 last_gen = do
     time<-getCurrentTime
     let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
     writeFile ("out/Datos_CF6"++ (take 10 (show time)) ++ ".dat") (unwords escribe)
     return ()
 
+guardar_datos_zdt3 :: (Show a1, Show a2) => [(a1, a2)] -> IO ()
 guardar_datos_zdt3 last_gen = do
     time<-getCurrentTime
     let escribe = [(show x ++ "\t" ++ show y ++ "\n")|(x,y)<-last_gen]
     writeFile ("out/Datos_ZDT3"++ (take 10 (show time)) ++".dat") (unwords escribe)
     return ()
    
--- F por Windows
+-- F por Windows, que no le va gnuplot
 -- plotDots [Key Nothing, XRange (-0.1,1.1), YRange(-1.1,1.1)] a

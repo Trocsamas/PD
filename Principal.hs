@@ -10,6 +10,7 @@ import SolucionZDT3
 import SolucionCF6
 import Data.Time
 
+funcionZDT3 :: IO ()
 funcionZDT3 = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nFunción ZDT3 seleccionada"
@@ -35,7 +36,8 @@ funcionZDT3 = do
     siguiente_accion_zdt3 last_gen
     putStr $ show (selecciona_evaluaciones_de_generacionZDT3 100 final)
     return ()
-
+    
+funcionCF6_4 :: IO ()
 funcionCF6_4 = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nFunción CF6 4 seleccionada"
@@ -62,6 +64,7 @@ funcionCF6_4 = do
     putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
+funcionCF6_16 :: IO ()
 funcionCF6_16 = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nFunción CF6 16 seleccionada"
@@ -88,6 +91,7 @@ funcionCF6_16 = do
     putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
+siguiente_accion_zdt3 :: [(Double, Double)] -> IO ()
 siguiente_accion_zdt3 last_gen = do
     hSetBuffering stdout NoBuffering    
     putStrLn "\nSeleccione la acción que desea realizar:\n"
@@ -100,18 +104,21 @@ siguiente_accion_zdt3 last_gen = do
               "3" -> return ()
               _ -> putStrLn "\nNo ha seleccionado un indice correcto, vuelva a intentarlo" >> siguiente_accion_zdt3 last_gen
 
+visualizar_fichero_cf6 :: IO ()
 visualizar_fichero_cf6 = do
     time <- getCurrentTime
     createDirectoryIfMissing True "out"
     datos <- cargaDatos ("out/Datos_CF6"++ (take 10 (show time)) ++ ".dat")
     plotList [Key Nothing, XRange (0,1), YRange(0,1)] datos
     
+visualizar_fichero_zdt3 :: IO ()
 visualizar_fichero_zdt3 = do
     time <- getCurrentTime
     createDirectoryIfMissing True "out"
     datos <- cargaDatos ("out/Datos_ZDT3"++ (take 10 (show time)) ++ ".dat")
     plotDots [Key Nothing, XRange (0,1), YRange(-1,1)] datos
     
+siguiente_accion_cf6 :: [(Double, Double)] -> IO ()
 siguiente_accion_cf6 last_gen = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nSeleccione la acción que desea realizar:\n"
@@ -124,7 +131,7 @@ siguiente_accion_cf6 last_gen = do
               "3" -> return ()
               _ -> putStrLn "\nNo ha seleccionado un indice correcto, vuelva a intentarlo" >> siguiente_accion_cf6 last_gen
 
-    
+main :: IO ()
 main = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nSeleccione la función que desea optimizar:\n"
