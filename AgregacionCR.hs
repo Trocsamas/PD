@@ -11,13 +11,13 @@ import System.Random
 
 
 --Algoritmo de Agregación con Restricciones mediante CF6
-{--
+
 algoritmo_agregacion_restricciones n g t f cr = do
-    let pesos = calc_pesos n
+    let pesos = calc_pesos (fromIntegral n)
     let vecindario = calc_vecindario pesos n t
     poblacion <- generaPoblacion n
     let eval_aux = unzip (evalua_cf6 poblacion)
-    let (eval_poblacion,restricciones) = (snd eval_aux, fst eval_aux)
+    let (eval_poblacion,restricciones) = (fst eval_aux, snd eval_aux)
     let z = calc_z eval_poblacion
     res <- algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g
     return res
@@ -27,7 +27,7 @@ algoritmo_agregacion_restricciones_aux poblacion eval_poblacion _ _ _ _ _ _ 0 = 
 algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones vecindario pesos z f cr g = do
     mutantes <- calc_mutantes_restricciones poblacion vecindario f cr
     let eval_aux = unzip (evalua_cf6 mutantes)
-    let (eval_mutantes,restricciones_mutantes) = (snd eval_aux, fst eval_aux)
+    let (eval_mutantes,restricciones_mutantes) = (fst eval_aux, snd eval_aux)
     let z_mutante = calc_z eval_mutantes
     let z_act = [if ((z!!x)<(z_mutante!!x)) then z!!x else z_mutante!!x | x <- [0..1]]
     let subproblemas = calc_subproblemas eval_poblacion pesos z_act
@@ -36,7 +36,7 @@ algoritmo_agregacion_restricciones_aux poblacion eval_poblacion restricciones ve
     let res = (poblacion_act,eval_poblacion_act,restricciones_act)
     resto <-algoritmo_agregacion_restricciones_aux poblacion_act eval_poblacion_act restricciones_act vecindario pesos z_act f cr (g-1)
     return (res:resto)
-    --}
+
 
 parte :: [a] -> Int -> [[a]]
 parte [] _ = []
