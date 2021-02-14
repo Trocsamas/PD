@@ -34,7 +34,6 @@ funcionZDT3 = do
     let final = nuevaSolucionZDT3 solucion
     let last_gen = selecciona_evaluaciones_de_generacionZDT3 (length (solucion)) final
     siguiente_accion_zdt3 last_gen
-    putStr $ show (selecciona_evaluaciones_de_generacionZDT3 100 final)
     return ()
     
 funcionCF6_4 :: IO ()
@@ -61,7 +60,6 @@ funcionCF6_4 = do
     let final = nuevaSolucionCF6 solucion
     let last_gen = selecciona_evaluaciones_de_generacionCF6 (length (solucion)) final
     siguiente_accion_cf6 last_gen
-    putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
 funcionCF6_16 :: IO ()
@@ -88,14 +86,13 @@ funcionCF6_16 = do
     let final = nuevaSolucionCF6 solucion
     let last_gen = selecciona_evaluaciones_de_generacionCF6 (length (solucion)) final
     siguiente_accion_cf6 last_gen
-    putStr $ show (selecciona_evaluaciones_de_generacionCF6 100 final)
     return ()
 
 siguiente_accion_zdt3 :: [(Double, Double)] -> IO ()
 siguiente_accion_zdt3 last_gen = do
     hSetBuffering stdout NoBuffering    
     putStrLn "\nSeleccione la acción que desea realizar:\n"
-    putStrLn "\t1. Guardar las generaciones"
+    putStrLn "\t1. Guardar la última generación e imprimirla con Gnuplot" 
     putStrLn "\t2. Volver al menú principal"
     putStrLn "\t3. Salir"
     o <- getLine
@@ -122,7 +119,7 @@ siguiente_accion_cf6 :: [(Double, Double)] -> IO ()
 siguiente_accion_cf6 last_gen = do
     hSetBuffering stdout NoBuffering
     putStrLn "\nSeleccione la acción que desea realizar:\n"
-    putStrLn "\t1. Guardar las generaciones"
+    putStrLn "\t1. Guardar la última generación e imprimirla con Gnuplot" 
     putStrLn "\t2. Volver al menú principal"
     putStrLn "\t3. Salir"
     o <- getLine
