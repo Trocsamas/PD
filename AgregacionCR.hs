@@ -44,11 +44,11 @@ parte xs n = (take n xs) : parte (drop n xs) n
 
 -- Cálculo de los vectores de pesos
 -- =========================================================================
--- Se crea un conjunto de vectores peso de tamaño N), cumpliéndose que la 
+-- Se crea un conjunto de vectores peso de tamaño N, cumpliéndose que la 
 -- suma de los componentes de cada vector es la unidad y dichos vectores 
 -- peso están repartidos uniformemente.
 -- Esto se consigue partiendo del vector (0,1) y calculando el paso a dar al 
--- siguiente vector para que quede uniformemente repartido paso = 1 / N−1
+-- siguiente vector para que quede uniformemente repartido. (paso = 1 / N−1)
 -- =========================================================================
 
 
@@ -57,7 +57,6 @@ calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
 -- Cálculo del Vecindario
-
 -- =========================================================================
 -- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
 -- aplicamos la fórmula:
@@ -80,7 +79,6 @@ distancias xs = parte [(distancia_euclidea i (xs !! j), j) | i <-xs, j <- [0..n-
                     
 
 -- Generación de las Población
-
 -- =========================================================================
 -- Para generar una población inicial, hemos hecho uso de la libreria 
 -- System.Random, que genera números aleatorios tomando valores entre 0 y 1, 
@@ -119,8 +117,11 @@ calc_z xs = [f1,f2]
     where f1 = minimum [ x ! 1 | x <- xs]
           f2 = minimum [ x ! 2 | x <- xs]
 
--- Cálculo de los subproblemas
-
+-- Cálculo de subproblemas
+-- =========================================================================
+-- Se calcula mediante la función de Tchebychef
+-- 𝑔𝑡𝑒(𝑥|𝜆,𝑧∗) = 𝑚𝑎𝑥 {𝜆|𝑓𝑖(𝑥)−𝑧∗|} ,1≤𝑖≤𝑚
+-- =========================================================================
 calc_subproblemas :: (Ix i, Num i, Num b, Ord b) => [Array i b] -> [(b, b)] -> [b] -> [b]
 calc_subproblemas eval pesos z = maximo
     where resta = [((abs ((x!1)-z!!0),(abs ((x!2)-z!!1))))| x<-eval]

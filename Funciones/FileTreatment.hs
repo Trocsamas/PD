@@ -2,7 +2,7 @@
 -- con la lectura y escritura sobre ficheros
 -- =======================================================
 
-
+cargaDatos :: IO [(Double, Double)]
 cargaDatos = do  
         let fileName = "./PF.dat"
         dat <- readFile fileName
@@ -19,6 +19,7 @@ split x y = func x y [[]]
         else 
             func x ys ((y:z):zs)
 
+datos :: Foldable t => t [Char] -> [[[Char]]]
 datos lineas = foldr (\palabra js-> split '\t' palabra:js) [] lineas
 
 aNumero :: [[String]] -> [(Double, Double)]

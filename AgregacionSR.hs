@@ -34,8 +34,7 @@ algoritmo_agregacion_ZDT3_aux poblacion eval_poblacion vecindario pesos z f cr m
     resto <-algoritmo_agregacion_ZDT3_aux poblacion_act eval_poblacion_act vecindario pesos z_act f cr minimo maximo (g_fin-1)
     return (res:resto)
 
--- -- Cálculo de los Vectores de Pesos
-
+-- Cálculo de los Vectores de Pesos
 -- =========================================================================
 -- Se crea un conjunto de vectores peso de tamaño N), cumpliéndose que la 
 -- suma de los componentes de cada vector es la unidad y dichos vectores 
@@ -49,8 +48,7 @@ calc_pesos :: (Enum b, Fractional b) => b -> [(b, b)]
 calc_pesos n = [(0+paso*x,1-paso*x) | x <-[0..n-1]]
     where paso = 1/(n-1)
 
--- -- Cálculo del Vecindario
-
+-- Cálculo del Vecindario
 -- =========================================================================
 -- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
 -- aplicamos la fórmula:
@@ -75,7 +73,7 @@ parte :: [a] -> Int -> [[a]]
 parte [] _ = []
 parte xs n = (take n xs) : parte (drop n xs) n 
 
--- -- Cálculo de la Población Inicial
+-- Cálculo de la Población Inicial
 -- =========================================================================
 -- Para generar una población inicial, hemos hecho uso de la libreria 
 -- System.Random, que genera números aleatorios tomando valores entre 0 y 1, 
@@ -93,22 +91,21 @@ generaIndividuo n = do
   let xs = randomRs (0,1) gen
   return (take n xs)
 
--- -- Cálculo de las Evaluaciones con ZDT3
+-- Cálculo de las Evaluaciones con ZDT3
 
 evaluaciones :: Floating a => [[a]] -> [Funciones.Zdt3.Vector a]
 evaluaciones [] = []
 evaluaciones (x:xss) = zdt3 x : evaluaciones xss 
     
 
--- -- Cálculo del Punto Z
+-- Cálculo del Punto Z
     
 calc_z :: (Ix i, Num i, Ord a) => [Array i a] -> [a]
 calc_z xs = [f1,f2]
     where f1 = minimum [ x ! 1 | x <- xs]
           f2 = minimum [ x ! 2 | x <- xs]
     
--- -- Cálculo del vector Mutante
-
+-- Cálculo del vector Mutante
 -- =========================================================================
 -- Para cada vector/individuo se seleccionan 3 vectores/individuos vecinos y
 -- aplicamos la fórmula: vi (G + 1) = xr1(G) + F ∗ (xr2 (G) − xr3(G))
@@ -124,7 +121,7 @@ calc_mutante vecindario poblacion f cr min max = do
     let mutantes_finales = limitador mutantes_gaussianos min max
     return mutantes_finales
 
--- -- -- Funciones para el Cálculo del Vector Mutante
+-- Funciones para el Cálculo del Vector Mutante
 
 seleccion_aleatoria :: [a] -> [[Int]] -> IO [[a]]
 seleccion_aleatoria _ [] = do 
@@ -168,7 +165,7 @@ randomIndex :: [a] -> IO Int
 randomIndex [] = error "Cannot select an element from an empty list."
 randomIndex list = getStdRandom $ randomR (0, length list - 1)
 
--- -- -- -- Mutaciones dentro del intervalo [min,max]
+-- Mutaciones dentro del intervalo [min,max]
 
 mutaciones :: (Ord t, Num t) => [[[t]]] -> t -> t -> t -> [[t]]
 mutaciones elegidos f min max = limitador [mutaciones_aux x f|x<-elegidos]  min max
@@ -184,8 +181,7 @@ limitador_aux x min max
     | x>max = max
     |otherwise = x
 
--- -- -- -- Cálculo de cruces con vector mutante
-
+-- Cálculo de cruces con vector mutante
 -- =========================================================================
 -- Generamos una lista de True o False del tamaño de la dimensión del
 -- problema, generando números aleatorios y comparando si el valor es menor
@@ -215,8 +211,7 @@ puntos_de_cruce cr = do
     let cruces = [x < cr | x <- individuo]
     return cruces
 
--- -- -- -- Mutacion Gaussianas
-
+-- Mutacion Gaussianas
 -- =========================================================================
 -- Para introducir un poco más de diversidad en la búsqueda, aplicaremos
 -- este tipo de mutación.La probabilidad de mutación de un gen será 1/p,
@@ -244,13 +239,17 @@ comprobacion_gauss x rnd = if ((rnd!!0)<=1/30) then gauss else x
     where gauss = x + (distribucion_normal (rnd!!1))
     
 
--- -- -- -- Distribucion gaussiana con los valores mu 0 y sigma 1/20
+-- Distribucion gaussiana con los valores mu 0 y sigma 1/20
 
 distribucion_normal :: Floating a => a -> a
 distribucion_normal x = 20*(exp(-200*x^2)/sqrt(2*pi))
 
 
--- -- Cálculo de subproblemas
+-- Cálculo de subproblemas
+-- =========================================================================
+-- Se calcula mediante la función de Tchebychef
+-- 𝑔𝑡𝑒(𝑥|𝜆,𝑧∗) = 𝑚𝑎𝑥 {𝜆|𝑓𝑖(𝑥)−𝑧∗|} ,1≤𝑖≤𝑚
+-- =========================================================================
 calc_subproblemas :: (Ix i, Num i, Num b, Ord b) => [Array i b] -> [(b, b)] -> [b] -> [b]
 calc_subproblemas eval pesos z = maximo
     where resta = [((abs ((x!1)-z!!0),(abs ((x!2)-z!!1))))| x<-eval]
@@ -265,7 +264,7 @@ calc_maximo :: Ord a => [(a, a)] -> [a]
 calc_maximo [] = []
 calc_maximo (x:xs) = max (fst x) (snd x) : calc_maximo xs
 
--- -- Actualizaciones de las poblaciones
+-- Actualizaciones de las poblaciones
 actualiza_poblacion :: (Ix i, Num i, Num a1, Ord a1) => [a2] -> [Array i a1] -> [a2] -> [Array i a1] -> [a1] -> [[Int]] -> [(a1, a1)] -> [a1] -> Int -> ([a2], [Array i a1])
 actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subproblemas [] pesos z i = (poblacion,eval_poblacion)
 actualiza_poblacion poblacion eval_poblacion mutaciones eval_mutaciones subproblemas vecindario@(vs:vss) pesos z i = 
