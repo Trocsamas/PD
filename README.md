@@ -2,6 +2,17 @@ Trabajo sobre la asignatura Programación Declarativa
 
 Este trabajo consistirá en la optimización de funciones mediante algoritmo multiobjetivo basado en agregación.
 
+Las librerias usadas para el desarrollo del programa han sido las siguientes:
+    - System.Directory
+    - System.Random
+    - System.IO
+    - Data.Array
+    - Data.Time
+    - Data.List
+    - Data.Char
+    - Graphics.Gnuplot, para hacer uso de ella hemos tenido que instalarla mediante cabal
+        cabal install gnuplot
+
 Para compilar el programa, solo tenemos que ejecutar el siguiente comando:
     ghc -o Principal.hs principal.exe
 
